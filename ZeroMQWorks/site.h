@@ -4,7 +4,6 @@
 #include <zmq.h>
 #include <map>
 #include "message.h"
-#include "messageController.h"
 #include <mutex>
 
 class Site {
