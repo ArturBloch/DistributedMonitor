@@ -16,17 +16,11 @@ void Site::dealTypeMessageToAllSites(std::string objectAddress, MessageType mess
 	myRequests[objectAddress] = message; // add the message to your own vector as well
 	for (std::map<int, void*>::iterator it = peerSockets.begin(); it != peerSockets.end(); ++it) { // send the messages to all other sites
 		char* buffer = new char[255];
-		if (it != peerSockets.end())
-		{
-			zmqSendMessage(it->second, message);
-			memset(buffer, 0, 255);
-			zmq_recv(it->second, buffer, 255, 0);
-			Message message = Message(buffer);
-			processReceivedMessage(message);
-		}
-		else {
-			std::cout << "This port socket hasn't been found " << it->first << std::endl;
-		}
+		zmqSendMessage(it->second, message);
+		memset(buffer, 0, 255);
+		zmq_recv(it->second, buffer, 255, 0);
+		Message message = Message(buffer);
+		processReceivedMessage(message);
 	}
 	mtx.unlock();
 }
