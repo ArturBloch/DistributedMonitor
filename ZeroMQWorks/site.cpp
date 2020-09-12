@@ -43,6 +43,11 @@ Site::Site(int newPort, std::vector<int> otherPorts)
 
 Site::~Site()
 {
+	zmq_close(recvSocket);
+	for (std::map<int, void*>::iterator it = peerSockets.begin(); it != peerSockets.end(); ++it) {
+		zmq_close(it->second);
+	}
+	zmq_ctx_destroy(context);
 }
 
 void Site::initialize(int argSize, char** argv)
@@ -157,7 +162,6 @@ void Site::receiveMessages()
 
 void Site::processReceivedMessage(Message message)
 {
-	std::cout << message.toString() << std::endl;
 	if (message.isOther()) {
 		zmqSendMessage(recvSocket, Message(messageIdCounter, port, "OK"));
 		return;
