@@ -16,7 +16,10 @@ namespace Helper {
             return "REMOVE";
         case MessageType::OTHER:
             return "OTHER";
+        case MessageType::NOTIFY:
+            return "NOTIFY";
         }
+       
     }
 
     MessageType Helper::string_to_enum(std::string messageType)
@@ -29,7 +32,11 @@ namespace Helper {
         }
         else if (messageType == "REMOVE"){
             return MessageType::REMOVE;
-        } else {
+        }
+        else if (messageType == "NOTIFY") {
+            return MessageType::NOTIFY;
+        }
+        else if (messageType == "OTHER"){
             return MessageType::OTHER;
         }
         return MessageType();

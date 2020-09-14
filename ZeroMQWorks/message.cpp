@@ -55,6 +55,11 @@ bool Message::isOther()
     return Message::messageType == MessageType::OTHER;
 }
 
+bool Message::isNotify()
+{
+    return Message::messageType == MessageType::NOTIFY;
+}
+
 std::string Message::serialize()
 {
     return std::to_string(messageId) + ";" + std::to_string(responseTo) + ";" + std::to_string(port) + ";" + std::to_string(clockFromProcess) + ";" + objectAddress + ";" + Helper::enum_to_string(messageType);

@@ -13,7 +13,7 @@ void Site::dealTypeMessageToAllSites(std::string objectAddress, MessageType mess
 	mtx.lock();
 	long messageId = messageIdCounter;
 	Message message = Message(messageId, -1, port, getClockTime(), objectAddress, messageType);
-	myRequests[objectAddress] = message; // add the message to your own vector as well
+	if (message.isRequest()) myRequests[objectAddress] = message; // add the message to your own vector as well
 	for (std::map<int, void*>::iterator it = peerSockets.begin(); it != peerSockets.end(); ++it) { // send the messages to all other sites
 		char* buffer = new char[255];
 		zmqSendMessage(it->second, message);
@@ -33,12 +33,10 @@ void Site::zmqSendMessage(void* socket, Message message)
 
 Site::Site()
 {
+	port = -1;
+	waiting = false;
 	context = zmq_ctx_new();
 	messageIdCounter = 0;
-}
-
-Site::Site(int newPort, std::vector<int> otherPorts)
-{
 }
 
 Site::~Site()
@@ -106,7 +104,10 @@ void Site::tryEnter(std::string objectAddress, int ms)
 }
 
 void Site::wait(std::string objectAddress) {
+	waiting = true;
 	exit(objectAddress);
+	std::cout << "Site is in waiting";
+	while (waiting);
 	enter(objectAddress);
 }
 
@@ -138,6 +139,11 @@ bool Site::canEnterCriticalSection(std::string objectAddress)
 	std::cout << "Entered " << objectAddress << " " << replyMessages[objectAddress].size() << "/" << peerSockets.size() << std::endl;
 	mtx.unlock();
 	return true;
+}
+
+void Site::notifyAll(std::string objectAddress)
+{
+	dealTypeMessageToAllSites(objectAddress, MessageType::NOTIFY);
 }
 
 void Site::doWork() {
@@ -195,6 +201,11 @@ void Site::processReceivedMessage(Message message)
 				++it;
 			}
 		}
+	}
+	else if (message.isNotify()) {
+		zmqSendMessage(recvSocket, Message(messageIdCounter, port, "OK"));
+		if (!waiting) return;
+		waiting = false;
 	}
 }
 

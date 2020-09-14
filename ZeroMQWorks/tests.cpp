@@ -6,14 +6,17 @@ void runTestA(Site* site)
 {
 	site->enter("A");
 	site->doWork();
+	site->wait("A");
+	site->doWork();
 	site->exit("A");
 }
 
 void runTestB(Site* site)
 {
-	site->enter("B");
+	site->enter("A");
 	site->doWork();
-	site->exit("B");
+	site->notifyAll("A");
+	site->exit("A");
 }
 
 void runTestC(Site* site)

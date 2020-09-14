@@ -9,6 +9,7 @@
 class Site {
 private:
 	int messageIdCounter;
+	bool waiting;
 	std::map<std::string, std::vector<Message>> requestMessages;
 	std::map<std::string, std::vector<Message>> replyMessages;
 	std::map<std::string, Message> myRequests;
@@ -27,7 +28,6 @@ private:
 
 public:
 	Site();
-	Site(int newPort, std::vector<int> otherPorts);
 	~Site();
 
 	int port;
@@ -40,5 +40,6 @@ public:
 	void tryEnter(std::string objectAddress, int ms);
 	void wait(std::string objectAddress);
 	void exit(std::string objectAddress);
+	void notifyAll(std::string objectAddress);
 	void doWork();
 };

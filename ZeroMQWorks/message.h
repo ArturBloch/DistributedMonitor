@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
 
-enum class MessageType { REQUEST, REPLY, REMOVE, OTHER};
+enum class MessageType { REQUEST, REPLY, REMOVE, OTHER, NOTIFY};
 
 class Message {
 
@@ -21,6 +21,7 @@ public:
     bool isReply();
     bool isRemove();
     bool isOther();
+    bool isNotify();
     std::string serialize();
     std::string toString();
 };
