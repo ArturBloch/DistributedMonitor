@@ -35,6 +35,7 @@ public:
 	void* recvSocket;
 	std::map<int, void*> peerSockets;
 
+	void connectTo(int port);
 	void initialize(int argSize, char** argv);
 	void enter(std::string objectAddress);
 	void tryEnter(std::string objectAddress, int ms);

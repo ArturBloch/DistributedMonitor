@@ -57,17 +57,10 @@ void Site::initialize(int argSize, char** argv)
 	std::cout << "Listening on " << siteRecvSocket << std::endl;
 	int rc = zmq_bind(recvSocket, siteRecvSocket.c_str());
 	assert(rc == 0);
-
 	for (int i = 3; i < argSize; i++) {
 		int peerPortNumber = atoi(argv[i]);
-		void* sendSocket = zmq_socket(context, ZMQ_REQ);
-		std::string siteSendSocket = "tcp://127.0.0.1:" + std::to_string(peerPortNumber);
-		std::cout << "Connected to " << peerPortNumber << std::endl;
-		int rc = zmq_connect(sendSocket, siteSendSocket.c_str());
-		peerSockets[peerPortNumber] = sendSocket;
-		assert(rc == 0);
+		connectTo(peerPortNumber);
 	}
-
 	std::thread receiveThread(&Site::receiveMessages, this);
 	receiveThread.detach();
 }
@@ -78,6 +71,21 @@ void Site::enter(std::string objectAddress)
 	dealTypeMessageToAllSites(objectAddress, MessageType::REQUEST);
 	while (!canEnterCriticalSection(objectAddress)) {
 		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+	}
+}
+
+void Site::connectTo(int peerPort) {
+	void* sendSocket = zmq_socket(context, ZMQ_REQ);
+	int connectTimeout = 1000;
+	std::string siteSendSocket = "tcp://127.0.0.1:" + std::to_string(peerPort);
+	int rc = zmq_connect(sendSocket, siteSendSocket.c_str());
+	if (rc == 0) {
+		peerSockets[peerPort] = sendSocket;
+		std::cout << "Managed to connect to a site at " << siteSendSocket << std::endl;
+		std::cout << "That does not mean that the other site is online! " << std::endl;
+	}
+	else {
+		std::cout << "Didn't manage to connect to a site at " << siteSendSocket << std::endl;
 	}
 }
 
@@ -113,7 +121,7 @@ void Site::wait(std::string objectAddress) {
 
 void Site::exit(std::string objectAddress) {
 	mtx.lock();
-	std::cout << "Exiting critical section" << objectAddress << std::endl;
+	std::cout << "Exiting critical section " << objectAddress << std::endl;
 	myRequests.erase(objectAddress);
 	for (std::vector<Message>::iterator it = requestMessages[objectAddress].begin(); it != requestMessages[objectAddress].end(); ++it) {
 		Message replyMessage = Message(messageIdCounter, it->messageId, port, getClockTime(), objectAddress, MessageType::REPLY);

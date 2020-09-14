@@ -13,8 +13,8 @@ int main(int argc, char** argv)
 		site.initialize(argc, argv);
 	}
 	else {
-		std::cout << "Wrong initialization" << std::endl;
-		return 0;
+		site.initialize(argc, argv);
+		std::cout << "Connect to sockets manually by typing CONNECT" << std::endl;
 	}
 	std::string answer;
 	while (true) {
@@ -27,6 +27,11 @@ int main(int argc, char** argv)
 		}
 		else if (answer == "TESTC") {
 			runTestC(&site);
+		}
+		else if (answer == "CONNECT") {
+			std::cout << "type port number you want to connect to " << std::endl;
+			std::cin >> answer;
+			site.connectTo(stoi(answer));
 		}
 	}
 }
